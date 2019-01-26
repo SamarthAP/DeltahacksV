@@ -8,6 +8,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
