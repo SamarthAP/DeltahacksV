@@ -60,10 +60,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private final String[] requiredPermissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
-    Button btnRecord, btnStopRecord, btnPlay, btnStop;
-    String pathSave = "";
+    Button btnRecord, btnStopRecord;
+    //Button btnPlay, btnStop;
+
+    public static String pathSave = "";
+    public static String pathRaw = "";
+
     MediaRecorder mediaRecorder;
-    MediaPlayer mediaPlayer;
+    //MediaPlayer mediaPlayer;
+
+    ApneaDetector apneaDetector = new ApneaDetector();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,9 +108,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         yText = (TextView)findViewById(R.id.yText);
         zText = (TextView)findViewById(R.id.zText);
 
-        btnPlay = (Button)findViewById(R.id.btnPlay);
+        //btnPlay = (Button)findViewById(R.id.btnPlay);
         btnRecord = (Button)findViewById(R.id.btnStartRecord);
-        btnStop = (Button)findViewById(R.id.btnStop);
+        //btnStop = (Button)findViewById(R.id.btnStop);
         btnStopRecord = (Button)findViewById(R.id.btnStopRecord);
         terminator = (Button)findViewById(R.id.terminateButton);
 
@@ -127,9 +133,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             requestPermission();
 
         //Init view
-        btnPlay = (Button)findViewById(R.id.btnPlay);
+        //btnPlay = (Button)findViewById(R.id.btnPlay);
         btnRecord = (Button)findViewById(R.id.btnStartRecord);
-        btnStop = (Button)findViewById(R.id.btnStop);
+        //btnStop = (Button)findViewById(R.id.btnStop);
         btnStopRecord = (Button)findViewById(R.id.btnStopRecord);
 
         // from Android M, request runtime permission
@@ -138,8 +144,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public void onClick(View view) {
                 onResume();
                 if (checkPermissionFromDevice()) {
-                    pathSave = Environment.getExternalStorageDirectory().getAbsolutePath() +
-                            "/" + UUID.randomUUID().toString() + "_audio_record.3aac";
+
+//                    pathRaw = Environment.getExternalStorageDirectory().getAbsolutePath() +
+//                            "/" + UUID.randomUUID().toString();
+//                    pathSave = pathRaw + "_audio_record.3aac";
                     setUpMediaRecorder();
                     try {
                         mediaRecorder.prepare();
@@ -148,8 +156,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         e.printStackTrace();
                     }
 
-                    btnPlay.setEnabled(false);
-                    btnStop.setEnabled(false);
+                    //btnPlay.setEnabled(false);
+                    //btnStop.setEnabled(false);
 
                     Toast.makeText(MainActivity.this, "Recording...", Toast.LENGTH_SHORT).show();
                 } else {
@@ -171,50 +179,59 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public void onClick (View view){
                 onPause();
                 mediaRecorder.stop();
-                btnStop.setEnabled(false);
-                btnPlay.setEnabled(true);
+                //btnStop.setEnabled(false);
+                //btnPlay.setEnabled(true);
                 btnRecord.setEnabled(true);
                 btnStopRecord.setEnabled(false);
+                //mediaPlayer.release();
+                convertFile();
+
+                Log.e("PATHTHISONE", pathRaw);
+                Toast.makeText(MainActivity.this, "STATUS: " + apneaDetector.getStatus(), Toast.LENGTH_LONG).show();
+
+                setUpMediaRecorder();
             }
         });
 
-        btnPlay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                btnStop.setEnabled(true);
-                btnStopRecord.setEnabled(true);
-                btnRecord.setEnabled(false);
-                btnPlay.setEnabled(false);
+//        btnPlay.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                btnStop.setEnabled(true);
+//                btnStopRecord.setEnabled(true);
+//                btnRecord.setEnabled(false);
+//                btnPlay.setEnabled(false);
+//
+//                mediaPlayer = new MediaPlayer();
+//                try {
+//                    mediaPlayer.setDataSource(pathSave);
+//                    mediaPlayer.prepare();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                mediaPlayer.start();
+//                Toast.makeText(MainActivity.this, "Playing...", Toast.LENGTH_LONG).show();
+//            }
+//        });
 
-                mediaPlayer = new MediaPlayer();
-                try {
-                    mediaPlayer.setDataSource(pathSave);
-                    mediaPlayer.prepare();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                mediaPlayer.start();
-                Toast.makeText(MainActivity.this, "Playing...", Toast.LENGTH_LONG).show();
-            }
-        });
-
-        btnStop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                btnStopRecord.setEnabled(false);
-                btnRecord.setEnabled(true);
-                btnPlay.setEnabled(true);
-                btnStop.setEnabled(false);
-
-                if (mediaPlayer != null){
-                    mediaPlayer.stop();
-                    mediaPlayer.release();
-                    convertFile();
-                    setUpMediaRecorder();
-                }
-            }
-        });
+//        btnStop.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                btnStopRecord.setEnabled(false);
+//                btnRecord.setEnabled(true);
+//                btnPlay.setEnabled(true);
+//                btnStop.setEnabled(false);
+//
+//                if (mediaPlayer != null){
+//                    mediaPlayer.stop();
+//                    mediaPlayer.release();
+//                    convertFile();
+//                    Log.e("PATHTHISONE", pathRaw);
+//                    Toast.makeText(MainActivity.this, "STATUS: " + apneaDetector.getStatus(), Toast.LENGTH_LONG).show();
+//                    setUpMediaRecorder();
+//                }
+//            }
+//        });
 
 
 
@@ -277,7 +294,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     f.close();
 
 
-                    Toast.makeText(getBaseContext(), "Data saved", Toast.LENGTH_LONG).show();
+                    // TODO: Toast.makeText(getBaseContext(), "Data saved", Toast.LENGTH_LONG).show();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -323,6 +340,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                 // Start conversion
                 .convert();
+        Log.e("POOP", aacFile.getPath()); // TODO: Remove
     }
 
     public void displayCleanValues() {
@@ -350,6 +368,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
         mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
+
+        pathRaw = Environment.getExternalStorageDirectory().getAbsolutePath() +
+                "/" + UUID.randomUUID().toString();
+        pathSave = pathRaw + "_audio_record.3aac";
+
         mediaRecorder.setOutputFile(pathSave);
     }
 
