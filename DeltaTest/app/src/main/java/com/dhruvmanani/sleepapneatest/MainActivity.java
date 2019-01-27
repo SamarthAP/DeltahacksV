@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SensorManager sensorManager;
 
     private Button terminator;
+    private int numMovements = 0;
 
     private float threshold = 0;
 
@@ -54,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private float lastX = 0, lastY = 0, lastZ = 0;
 
+    TextView sleepMovement;
 
     final int REQUEST_CODE_WRITE = 123;
     final int REQUEST_CODE_RECORD = 1000;
@@ -107,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         xText = (TextView)findViewById(R.id.xText);
         yText = (TextView)findViewById(R.id.yText);
         zText = (TextView)findViewById(R.id.zText);
+        sleepMovement = (TextView)findViewById(R.id.sleepMovement);
 
         //btnPlay = (Button)findViewById(R.id.btnPlay);
         btnRecord = (Button)findViewById(R.id.btnStartRecord);
@@ -253,63 +256,38 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         sensorManager.unregisterListener(this);
     }
 
+
     @Override
     public void onSensorChanged(SensorEvent event) {
 
-            // clean current values
-            displayCleanValues();
-            // display the current x,y,z accelerometer values
-            displayCurrentValues();
+        // clean current values
+        displayCleanValues();
+        // display the current x,y,z accelerometer values
+        displayCurrentValues();
 
-            // get the change of the x,y,z values of the accelerometer
-            deltaX = Math.abs(lastX - event.values[0]);
-            deltaY = Math.abs(lastY - event.values[1]);
-            deltaZ = Math.abs(lastZ - event.values[2]);
+        // get the change of the x,y,z values of the accelerometer
+        deltaX = Math.abs(lastX - event.values[0]);
+        deltaY = Math.abs(lastY - event.values[1]);
+        deltaZ = Math.abs(lastZ - event.values[2]);
 
-            // if the change is below 2, it is just plain noise
-            if (deltaX < 2)
-                deltaX = 0;
-            if (deltaY < 2)
-                deltaY = 0;
-            if (deltaZ < 2)
-                deltaX = 0;
+        if (deltaX + deltaY + deltaZ > 6) {
+            numMovements ++;
+        }
 
+        if (numMovements < 10){
+            sleepMovement.setText("Sleep Movement: Low");
+        }
+        else if (numMovements >= 10 && numMovements < 20){
+            sleepMovement.setText("Sleep Movement: Medium");
+        }
+        else if (numMovements >= 20){
+            sleepMovement.setText("Sleep Movement: High");
+        }
+        System.out.println(deltaX);
 
-            String entry = xText.getText().toString() + "," + yText.getText().toString() + "," + zText.getText().toString() + "\n";
-            try {
-
-                File sdCard = Environment.getExternalStorageDirectory();
-                File dir = new File(sdCard.getAbsolutePath() + "/Goodnight");
-                Boolean dirsMade = dir.mkdir();
-                //System.out.println(dirsMade);
-                Log.v("Accel", dirsMade.toString());
-
-                File file = new File(dir, "output.csv");
-                FileOutputStream f = new FileOutputStream(file, true);
-
-                try {
-                    f.write(initEntry.getBytes());
-                    f.write(entry.getBytes());
-                    f.flush();
-                    f.close();
-
-
-                    // TODO: Toast.makeText(getBaseContext(), "Data saved", Toast.LENGTH_LONG).show();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                initEntry = "";
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            public void run() {
-                // Actions to do after 1 second
-            }
-        }, 1000);
-
+        lastX = event.values[0];
+        lastY = event.values[1];
+        lastZ = event.values[2];
     }
 
     private void convertFile() {
@@ -416,5 +394,4 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 Manifest.permission.RECORD_AUDIO
         }, REQUEST_CODE_RECORD);
     }
-
 }
