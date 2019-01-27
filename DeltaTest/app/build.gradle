@@ -40,4 +40,5 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'com.github.adrielcafe:AndroidAudioConverter:0.0.8'
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.+'
 }

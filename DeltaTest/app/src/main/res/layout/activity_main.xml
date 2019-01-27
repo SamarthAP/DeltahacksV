@@ -11,11 +11,23 @@
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="208dp"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="220dp"
         android:text="RECORD AREA"
         android:textColor="@android:color/holo_blue_bright"
         android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="Accelerometer Data"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -36,7 +48,7 @@
         android:id="@+id/textView4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="208dp"
+        android:layout_marginTop="220dp"
         android:layout_marginEnd="32dp"
         android:text="PLAY AREA"
         android:textColor="@android:color/holo_blue_bright"
@@ -49,13 +61,13 @@
         android:layout_width="289dp"
         android:layout_height="40dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="56dp"
+        android:layout_marginTop="96dp"
         android:layout_marginEnd="8dp"
         android:text="TextView"
         android:textColor="@android:color/holo_blue_bright"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.443"
+        app:layout_constraintHorizontal_bias="0.493"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -70,7 +82,7 @@
         android:textColor="@android:color/holo_blue_bright"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.454"
+        app:layout_constraintHorizontal_bias="0.506"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/yText" />
 
@@ -79,25 +91,22 @@
         android:layout_width="295dp"
         android:layout_height="40dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="48dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="28dp"
         android:text="TextView"
         android:textColor="@android:color/holo_blue_bright"
         android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@+id/yText"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.479"
+        app:layout_constraintHorizontal_bias="0.534"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btnStartRecord"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="60dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginStart="64dp"
+        android:layout_marginTop="28dp"
         android:background="@drawable/rounded_button"
         android:text="RECORD"
         app:layout_constraintStart_toStartOf="parent"
@@ -121,7 +130,7 @@
         android:id="@+id/btnPlay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="28dp"
         android:layout_marginEnd="48dp"
         android:background="@drawable/rounded_button"
         android:text="PLAY"
@@ -137,5 +146,16 @@
         android:text="STOP"
         app:layout_constraintStart_toStartOf="@+id/btnPlay"
         app:layout_constraintTop_toBottomOf="@+id/btnPlay" />
+
+    <pl.droidsonroids.gif.GifImageView
+        android:layout_width="106dp"
+        android:layout_height="100dp"
+        android:layout_marginEnd="16dp"
+
+        android:layout_marginBottom="16dp"
+        android:src="@drawable/moon"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
 
 </android.support.constraint.ConstraintLayout>
