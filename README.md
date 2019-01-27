@@ -16,6 +16,9 @@ The biggest challenge we ran into was working with a .WAV file to analyze the da
 
 Another significant challenge we encountered was **downsizing** the data. After quantifying the data, we were provided with approximately **44100 data points** of the amplitude within a single second. Hence parsing through a file with over a million data points was extremely challenging and once again, was a challenge that was overcome and is reflected within the final product. 
 
+## Accomplishments that we're proud of
+The biggest accomplishment for us was successfully building an app within 24 hours. Moreover, the app that we built has a significant practical application and has the potential to make a difference in the world.
+
 ## What we learned
 As two of the team members attended their first hackathon, this was a great learning experience for them. Namely, both individuals were exposed to using **Git** as a version control system. Furthermore, both individuals got experience developing software in a **practical setting** and applying it to a **real-world setting**. 
 
