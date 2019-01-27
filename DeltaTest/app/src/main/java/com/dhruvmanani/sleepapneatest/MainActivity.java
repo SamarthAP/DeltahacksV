@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private  TextView xText, yText, zText;
     private  Sensor accelerometer;
     private SensorManager sensorManager;
+    private int numMovements = 0;
 
     private Button terminator;
 
@@ -65,6 +66,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     MediaRecorder mediaRecorder;
     MediaPlayer mediaPlayer;
 
+    TextView sleepMovement;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,15 +80,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         getSupportActionBar().setCustomView(R.layout.app_bar);
 
         sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
-
-        if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
-            accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-            threshold = accelerometer.getMaximumRange() / 2;
-        }
-        else {
-        Toast.makeText(getBaseContext(), "Can't Find Accelerometer", Toast.LENGTH_LONG).show();
-        }
 
         AndroidAudioConverter.load(this, new ILoadCallback() {
             @Override
@@ -101,6 +95,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         xText = (TextView)findViewById(R.id.xText);
         yText = (TextView)findViewById(R.id.yText);
         zText = (TextView)findViewById(R.id.zText);
+
+        sleepMovement = (TextView)findViewById(R.id.sleepMovement);
 
         btnPlay = (Button)findViewById(R.id.btnPlay);
         btnRecord = (Button)findViewById(R.id.btnStartRecord);
@@ -216,7 +212,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
 
-
+        if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
+            accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        }
+        else {
+            Toast.makeText(getBaseContext(), "Can't Find Accelerometer", Toast.LENGTH_LONG).show();
+        }
 
     }
 
@@ -227,7 +228,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     protected void onResume() {
         super.onResume();
-        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, accelerometer, Integer.MAX_VALUE, Integer.MAX_VALUE);
+
     }
 
     //onPause() unregister the accelerometer for stop listening the events
@@ -249,50 +251,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             deltaY = Math.abs(lastY - event.values[1]);
             deltaZ = Math.abs(lastZ - event.values[2]);
 
-            // if the change is below 2, it is just plain noise
-            if (deltaX < 2)
+            if (deltaX > 10 || deltaY > 10 || deltaZ > 10) {
                 deltaX = 0;
-            if (deltaY < 2)
                 deltaY = 0;
-            if (deltaZ < 2)
-                deltaX = 0;
-
-
-            String entry = xText.getText().toString() + "," + yText.getText().toString() + "," + zText.getText().toString() + "\n";
-            try {
-
-                File sdCard = Environment.getExternalStorageDirectory();
-                File dir = new File(sdCard.getAbsolutePath() + "/Goodnight");
-                Boolean dirsMade = dir.mkdir();
-                //System.out.println(dirsMade);
-                Log.v("Accel", dirsMade.toString());
-
-                File file = new File(dir, "output.csv");
-                FileOutputStream f = new FileOutputStream(file, true);
-
-                try {
-                    f.write(initEntry.getBytes());
-                    f.write(entry.getBytes());
-                    f.flush();
-                    f.close();
-
-
-                    Toast.makeText(getBaseContext(), "Data saved", Toast.LENGTH_LONG).show();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                initEntry = "";
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                deltaZ = 0;
+                numMovements ++;
             }
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            public void run() {
-                // Actions to do after 1 second
-            }
-        }, 1000);
 
+            if (numMovements < 50){
+                sleepMovement.setText("Sleep Movement: Low");
+            }
+            else if (numMovements >= 50 && numMovements < 100){
+                sleepMovement.setText("Sleep Movement: Medium");
+            }
+            else if (numMovements >= 100){
+                sleepMovement.setText("Sleep Movement: High");
+            }
+            System.out.println(deltaX);
     }
 
     private void convertFile() {
