@@ -13,8 +13,12 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -32,7 +36,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private float deltaX = 0, deltaY = 0, deltaZ = 0;
 
+    private String initEntry = "xValue,yValue,zValue\n";
+
     private float lastX = 0, lastY = 0, lastZ = 0;
+
+    ToggleButton startStopButton;
 
     final int REQUEST_CODE_ASK_PERMISSIONS = 123;
 
@@ -42,6 +50,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        startStopButton = (ToggleButton)findViewById(R.id.startStop);
 
         if (!checkWritePermissions()) requestStoragePermissions();
 
@@ -63,6 +73,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         xText = (TextView)findViewById(R.id.xText);
         yText = (TextView)findViewById(R.id.yText);
         zText = (TextView)findViewById(R.id.zText);
+
+        startStopButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    onResume();
+                }
+                else{
+                    onPause();
+                }
+            }
+        });
     }
 
     @Override
@@ -70,51 +92,68 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
+    protected void onResume() {
+        super.onResume();
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    //onPause() unregister the accelerometer for stop listening the events
+    protected void onPause() {
+        super.onPause();
+        sensorManager.unregisterListener(this);
+    }
+
     @Override
     public void onSensorChanged(SensorEvent event) {
-        // clean current values
-        displayCleanValues();
-        // display the current x,y,z accelerometer values
-        displayCurrentValues();
 
-        // get the change of the x,y,z values of the accelerometer
-        deltaX = Math.abs(lastX - event.values[0]);
-        deltaY = Math.abs(lastY - event.values[1]);
-        deltaZ = Math.abs(lastZ - event.values[2]);
+            // clean current values
+            displayCleanValues();
+            // display the current x,y,z accelerometer values
+            displayCurrentValues();
 
-        // if the change is below 2, it is just plain noise
-        if (deltaX < 2)
-            deltaX = 0;
-        if (deltaY < 2)
-            deltaY = 0;
-        if (deltaZ < 2)
-            deltaX = 0;
+            // get the change of the x,y,z values of the accelerometer
+            deltaX = Math.abs(lastX - event.values[0]);
+            deltaY = Math.abs(lastY - event.values[1]);
+            deltaZ = Math.abs(lastZ - event.values[2]);
 
-        String entry = xText.getText().toString() + "," + yText.getText().toString() + "," + zText.getText().toString() + ",";
-        try {
+            // if the change is below 2, it is just plain noise
+            if (deltaX < 2)
+                deltaX = 0;
+            if (deltaY < 2)
+                deltaY = 0;
+            if (deltaZ < 2)
+                deltaX = 0;
 
-            File sdCard = Environment.getExternalStorageDirectory();
-            File dir = new File(sdCard.getAbsolutePath() + "/sean");
-            Boolean dirsMade = dir.mkdir();
-            //System.out.println(dirsMade);
-            Log.v("Accel", dirsMade.toString());
 
-            File file = new File(dir, "output.csv");
-            FileOutputStream f = new FileOutputStream(file, true);
-
+            String entry = xText.getText().toString() + "," + yText.getText().toString() + "," + zText.getText().toString() + "\n";
             try {
-                f.write(entry.getBytes());
-                f.flush();
-                f.close();
-                Toast.makeText(getBaseContext(), "Data saved", Toast.LENGTH_LONG).show();
-            } catch (IOException e) {
+
+                File sdCard = Environment.getExternalStorageDirectory();
+                File dir = new File(sdCard.getAbsolutePath() + "/Goodnight");
+                Boolean dirsMade = dir.mkdir();
+                //System.out.println(dirsMade);
+                Log.v("Accel", dirsMade.toString());
+
+                File file = new File(dir, "output.csv");
+                FileOutputStream f = new FileOutputStream(file, true);
+
+                try {
+                    f.write(initEntry.getBytes());
+                    f.write(entry.getBytes());
+                    f.flush();
+                    f.close();
+
+
+                    Toast.makeText(getBaseContext(), "Data saved", Toast.LENGTH_LONG).show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                initEntry = "";
+
+            } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
 
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
     }
 
     public void displayCleanValues() {
