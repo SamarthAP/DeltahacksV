@@ -2,20 +2,32 @@ package com.example.android.testapplicationaudio;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.hardware.Sensor;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorEvent;
+import android.hardware.SensorManager;
+import android.widget.CompoundButton;
+import android.widget.ToggleButton;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -24,7 +36,22 @@ import cafe.adriel.androidaudioconverter.callback.IConvertCallback;
 import cafe.adriel.androidaudioconverter.callback.ILoadCallback;
 import cafe.adriel.androidaudioconverter.model.AudioFormat;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
+
+
+    private TextView xText, yText, zText;
+    private Sensor accelerometer;
+    private SensorManager sensorManager;
+
+    private float threshold = 0;
+
+    private float deltaX = 0, deltaY = 0, deltaZ = 0;
+
+    private String initEntry = "xValue,yValue,zValue\n";
+
+    private float lastX = 0, lastY = 0, lastZ = 0;
+
+    Button terminator;
 
     //Declare variables
     Button btnRecord, btnStopRecord, btnPlay, btnStop;
@@ -39,6 +66,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        getSupportActionBar().setTitle("Goodnight");
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setCustomView(R.layout.app_bar);
+
 
         AndroidAudioConverter.load(this, new ILoadCallback() {
             @Override
@@ -55,11 +87,27 @@ public class MainActivity extends AppCompatActivity {
         if (!checkPermissionFromDevice())
             requestPermission();
 
+        sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+
+        if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
+            accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            threshold = accelerometer.getMaximumRange() / 2;
+        }
+        else {
+            Toast.makeText(getBaseContext(), "Can't Find Accelerometer", Toast.LENGTH_LONG).show();
+        }
+
+        xText = (TextView)findViewById(R.id.xText);
+        yText = (TextView)findViewById(R.id.yText);
+        zText = (TextView)findViewById(R.id.zText);
+
         //Init view
         btnPlay = (Button)findViewById(R.id.btnPlay);
         btnRecord = (Button)findViewById(R.id.btnStartRecord);
         btnStop = (Button)findViewById(R.id.btnStop);
         btnStopRecord = (Button)findViewById(R.id.btnStopRecord);
+        terminator = (Button)findViewById(R.id.terminateButton);
 
 
         // from Android M, request runtime permission
@@ -136,6 +184,13 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             });
+
+            terminator.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    System.exit(0);
+                }
+            });
         }
 
     private void convertFile() {
@@ -208,5 +263,86 @@ public class MainActivity extends AppCompatActivity {
         int write_external_storage_result = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         int record_audio_result = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO);
         return (write_external_storage_result == PackageManager.PERMISSION_GRANTED) && (record_audio_result == PackageManager.PERMISSION_GRANTED);
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+
+        // clean current values
+        displayCleanValues();
+        // display the current x,y,z accelerometer values
+        displayCurrentValues();
+
+        // get the change of the x,y,z values of the accelerometer
+        deltaX = Math.abs(lastX - event.values[0]);
+        deltaY = Math.abs(lastY - event.values[1]);
+        deltaZ = Math.abs(lastZ - event.values[2]);
+
+        // if the change is below 2, it is just plain noise
+        if (deltaX < 2)
+            deltaX = 0;
+        if (deltaY < 2)
+            deltaY = 0;
+        if (deltaZ < 2)
+            deltaX = 0;
+
+
+        String entry = xText.getText().toString() + "," + yText.getText().toString() + "," + zText.getText().toString() + "\n";
+        try {
+
+            File sdCard = Environment.getExternalStorageDirectory();
+            File dir = new File(sdCard.getAbsolutePath() + "/Goodnight");
+            Boolean dirsMade = dir.mkdir();
+            //System.out.println(dirsMade);
+            Log.v("Accel", dirsMade.toString());
+
+            File file = new File(dir, "output.csv");
+            FileOutputStream f = new FileOutputStream(file, true);
+
+            try {
+                f.write(initEntry.getBytes());
+                f.write(entry.getBytes());
+                f.flush();
+                f.close();
+
+
+                Toast.makeText(getBaseContext(), "Data saved", Toast.LENGTH_LONG).show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            initEntry = "";
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void displayCleanValues() {
+        xText.setText("0.0");
+        yText.setText("0.0");
+        zText.setText("0.0");
+    }
+
+    // display the current x,y,z accelerometer values
+    public void displayCurrentValues() {
+        xText.setText(Float.toString(deltaX));
+        yText.setText(Float.toString(deltaY));
+        zText.setText(Float.toString(deltaZ));
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+    protected void onResume() {
+        super.onResume();
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    protected void onPause() {
+        super.onPause();
+        sensorManager.unregisterListener(this);
     }
 }
