@@ -270,7 +270,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         deltaY = Math.abs(lastY - event.values[1]);
         deltaZ = Math.abs(lastZ - event.values[2]);
 
-        if (deltaX + deltaY + deltaZ > 6) {
+        if (deltaX + deltaY + deltaZ > 10) {
             numMovements ++;
         }
 
