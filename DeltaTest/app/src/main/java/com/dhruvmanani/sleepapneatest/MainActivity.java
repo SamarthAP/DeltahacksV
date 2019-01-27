@@ -6,6 +6,7 @@ import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
 
 import android.hardware.Sensor;
@@ -26,7 +27,16 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import java.util.UUID;
 
+import cafe.adriel.androidaudioconverter.AndroidAudioConverter;
+import cafe.adriel.androidaudioconverter.callback.IConvertCallback;
+import cafe.adriel.androidaudioconverter.callback.ILoadCallback;
+import cafe.adriel.androidaudioconverter.model.AudioFormat;
+
+import android.media.MediaPlayer;
+import android.media.MediaRecorder;
+import android.support.annotation.NonNull;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -44,9 +54,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     ToggleButton startStopButton;
 
-    final int REQUEST_CODE_ASK_PERMISSIONS = 123;
+    final int REQUEST_CODE_WRITE = 123;
+    final int REQUEST_CODE_RECORD = 1000;
 
     private final String[] requiredPermissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+    Button btnRecord, btnStopRecord, btnPlay, btnStop;
+    String pathSave = "";
+    MediaRecorder mediaRecorder;
+    MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +103,105 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
             }
         });
+
+        /* ---AUDIO RECORDING LOGIC--- */
+
+        AndroidAudioConverter.load(this, new ILoadCallback() {
+            @Override
+            public void onSuccess() {
+                // Great!
+            }
+            @Override
+            public void onFailure(Exception error) {
+                // FFmpeg is not supported by device
+            }
+        });
+
+        //Request runtime position
+        if (!checkPermissionFromDevice())
+            requestPermission();
+
+        //Init view
+        btnPlay = (Button)findViewById(R.id.btnPlay);
+        btnRecord = (Button)findViewById(R.id.btnStartRecord);
+        btnStop = (Button)findViewById(R.id.btnStop);
+        btnStopRecord = (Button)findViewById(R.id.btnStopRecord);
+
+        // from Android M, request runtime permission
+        btnRecord.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+
+                if (checkPermissionFromDevice()) {
+                    pathSave = Environment.getExternalStorageDirectory().getAbsolutePath() +
+                            "/" + UUID.randomUUID().toString() + "_audio_record.3aac";
+                    setUpMediaRecorder();
+                    try {
+                        mediaRecorder.prepare();
+                        mediaRecorder.start();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    btnPlay.setEnabled(false);
+                    btnStop.setEnabled(false);
+
+                    Toast.makeText(MainActivity.this, "Recording...", Toast.LENGTH_SHORT).show();
+                } else {
+                    requestPermission();
+                }
+            }
+        });
+
+        btnStopRecord.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick (View view){
+                mediaRecorder.stop();
+                btnStop.setEnabled(false);
+                btnPlay.setEnabled(true);
+                btnRecord.setEnabled(true);
+                btnStopRecord.setEnabled(false);
+            }
+        });
+
+        btnPlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                btnStop.setEnabled(true);
+                btnStopRecord.setEnabled(true);
+                btnRecord.setEnabled(false);
+                btnPlay.setEnabled(false);
+
+                mediaPlayer = new MediaPlayer();
+                try {
+                    mediaPlayer.setDataSource(pathSave);
+                    mediaPlayer.prepare();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                mediaPlayer.start();
+                Toast.makeText(MainActivity.this, "Playing...", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        btnStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                btnStopRecord.setEnabled(false);
+                btnRecord.setEnabled(true);
+                btnPlay.setEnabled(true);
+                btnStop.setEnabled(false);
+
+                if (mediaPlayer != null){
+                    mediaPlayer.stop();
+                    mediaPlayer.release();
+                    convertFile();
+                    setUpMediaRecorder();
+                }
+            }
+        });
+
     }
 
     @Override
@@ -164,6 +279,36 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
+    private void convertFile() {
+        Log.e("MEDIAFILE",  pathSave);
+        File aacFile = new File(pathSave);
+        Log.e("MEDIAFILE", "CONVERTING");
+        IConvertCallback callback = new IConvertCallback() {
+            @Override
+            public void onSuccess(File convertedFile) {
+                Log.e("MEDIAFILE", convertedFile.toString());
+                // So fast? Love it!
+            }
+            @Override
+            public void onFailure(Exception error) {
+                Log.e("MEDIAFILE", error.toString());
+                // Oops! Something went wrong
+            }
+        };
+        AndroidAudioConverter.with(this)
+                // Your current audio file
+                .setFile(aacFile)
+
+                // Your desired audio format
+                .setFormat(AudioFormat.WAV)
+
+                // An callback to know when conversion is finished
+                .setCallback(callback)
+
+                // Start conversion
+                .convert();
+    }
+
     public void displayCleanValues() {
         xText.setText("0.0");
         yText.setText("0.0");
@@ -181,17 +326,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         ActivityCompat.requestPermissions(
                 this,
                 requiredPermissions,
-                REQUEST_CODE_ASK_PERMISSIONS);
+                REQUEST_CODE_WRITE);
     }
 
-//    private void checkPermissions() {
-//        int hasWriteContactsPermission = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-//        if (hasWriteContactsPermission != PackageManager.PERMISSION_GRANTED) {
-//            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE_ASK_PERMISSIONS);
-//            return;
-//        }
-//        Toast.makeText(getBaseContext(), "Permission is already granted", Toast.LENGTH_LONG).show();
-//    }
+    private void setUpMediaRecorder() {
+        mediaRecorder = new MediaRecorder();
+        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
+        mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
+        mediaRecorder.setOutputFile(pathSave);
+    }
 
     private boolean checkWritePermissions() {
         for (String permission : requiredPermissions) {
@@ -206,7 +350,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
-            case REQUEST_CODE_ASK_PERMISSIONS:
+            case REQUEST_CODE_WRITE:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Permission Granted
                     Toast.makeText(getBaseContext(), "Permission Granted", Toast.LENGTH_LONG).show();
@@ -218,6 +362,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             default:
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
+    }
+
+    private boolean checkPermissionFromDevice(){
+        int write_external_storage_result = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        int record_audio_result = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO);
+        return (write_external_storage_result == PackageManager.PERMISSION_GRANTED) && (record_audio_result == PackageManager.PERMISSION_GRANTED);
+    }
+
+    private void requestPermission(){
+        ActivityCompat.requestPermissions(this, new String[]{
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.RECORD_AUDIO
+        }, REQUEST_CODE_RECORD);
     }
 
 }

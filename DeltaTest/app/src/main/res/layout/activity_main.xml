@@ -76,4 +76,52 @@
         app:layout_constraintHorizontal_bias="0.509"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="RECORD AREA"
+        android:textSize="24sp"
+        tools:layout_editor_absoluteX="28dp"
+        tools:layout_editor_absoluteY="377dp" />
+
+    <Button
+        android:id="@+id/btnStartRecord"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="RECORD"
+        tools:layout_editor_absoluteX="76dp"
+        tools:layout_editor_absoluteY="433dp" />
+
+    <Button
+        android:id="@+id/btnStopRecord"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="STOP RECORD"
+        tools:layout_editor_absoluteX="61dp"
+        tools:layout_editor_absoluteY="503dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PLAY AREA"
+        android:textSize="24sp"
+        tools:layout_editor_absoluteX="208dp"
+        tools:layout_editor_absoluteY="369dp" />
+
+    <Button
+        android:id="@+id/btnPlay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PLAY"
+        tools:layout_editor_absoluteX="275dp"
+        tools:layout_editor_absoluteY="433dp" />
+
+    <Button
+        android:id="@+id/btnStop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="STOP"
+        tools:layout_editor_absoluteX="275dp"
+        tools:layout_editor_absoluteY="503dp" />
+
 </android.support.constraint.ConstraintLayout>
