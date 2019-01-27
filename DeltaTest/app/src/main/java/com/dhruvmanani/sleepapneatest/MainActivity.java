@@ -44,6 +44,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private  Sensor accelerometer;
     private SensorManager sensorManager;
 
+    private Button terminator;
+
     private float threshold = 0;
 
     private float deltaX = 0, deltaY = 0, deltaZ = 0;
@@ -52,7 +54,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private float lastX = 0, lastY = 0, lastZ = 0;
 
-    ToggleButton startStopButton;
 
     final int REQUEST_CODE_WRITE = 123;
     final int REQUEST_CODE_RECORD = 1000;
@@ -68,8 +69,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        startStopButton = (ToggleButton)findViewById(R.id.startStop);
 
         if (!checkWritePermissions()) requestStoragePermissions();
 
@@ -88,21 +87,27 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         Toast.makeText(getBaseContext(), "Can't Find Accelerometer", Toast.LENGTH_LONG).show();
         }
 
+        AndroidAudioConverter.load(this, new ILoadCallback() {
+            @Override
+            public void onSuccess() {
+                // Great!
+            }
+            @Override
+            public void onFailure(Exception error) {
+                // FFmpeg is not supported by device
+            }
+        });
+
         xText = (TextView)findViewById(R.id.xText);
         yText = (TextView)findViewById(R.id.yText);
         zText = (TextView)findViewById(R.id.zText);
 
-        startStopButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    onResume();
-                }
-                else{
-                    onPause();
-                }
-            }
-        });
+        btnPlay = (Button)findViewById(R.id.btnPlay);
+        btnRecord = (Button)findViewById(R.id.btnStartRecord);
+        btnStop = (Button)findViewById(R.id.btnStop);
+        btnStopRecord = (Button)findViewById(R.id.btnStopRecord);
+        terminator = (Button)findViewById(R.id.terminateButton);
+
 
         /* ---AUDIO RECORDING LOGIC--- */
 
@@ -131,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         btnRecord.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-
+                onResume();
                 if (checkPermissionFromDevice()) {
                     pathSave = Environment.getExternalStorageDirectory().getAbsolutePath() +
                             "/" + UUID.randomUUID().toString() + "_audio_record.3aac";
@@ -156,6 +161,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         btnStopRecord.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick (View view){
+                onPause();
                 mediaRecorder.stop();
                 btnStop.setEnabled(false);
                 btnPlay.setEnabled(true);
