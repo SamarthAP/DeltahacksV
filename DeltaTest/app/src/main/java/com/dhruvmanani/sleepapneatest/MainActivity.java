@@ -158,6 +158,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
 
+        terminator.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+                System.exit(0);
+            }
+        });
+
         btnStopRecord.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick (View view){
@@ -207,6 +215,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
             }
         });
+
+
 
     }
 
