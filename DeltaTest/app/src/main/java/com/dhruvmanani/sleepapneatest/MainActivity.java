@@ -3,6 +3,7 @@ package com.dhruvmanani.sleepapneatest;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -35,11 +36,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     final int REQUEST_CODE_ASK_PERMISSIONS = 123;
 
+    private final String[] requiredPermissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        checkPermissions();
+
+        if (!checkWritePermissions()) requestStoragePermissions();
 
         getSupportActionBar().setTitle("Goodnight");
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
@@ -126,14 +130,31 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         zText.setText(Float.toString(deltaZ));
     }
 
+    public void requestStoragePermissions() {
+        ActivityCompat.requestPermissions(
+                this,
+                requiredPermissions,
+                REQUEST_CODE_ASK_PERMISSIONS);
+    }
 
-    private void checkPermissions() {
-        int hasWriteContactsPermission = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        if (hasWriteContactsPermission != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE_ASK_PERMISSIONS);
-            return;
+//    private void checkPermissions() {
+//        int hasWriteContactsPermission = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+//        if (hasWriteContactsPermission != PackageManager.PERMISSION_GRANTED) {
+//            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE_ASK_PERMISSIONS);
+//            return;
+//        }
+//        Toast.makeText(getBaseContext(), "Permission is already granted", Toast.LENGTH_LONG).show();
+//    }
+
+    private boolean checkWritePermissions() {
+        for (String permission : requiredPermissions) {
+            if (!(ActivityCompat.checkSelfPermission(this, permission) ==
+                    PackageManager.PERMISSION_GRANTED)) {
+
+                return false;
+            }
         }
-        Toast.makeText(getBaseContext(), "Permission is already granted", Toast.LENGTH_LONG).show();
+        return true;
     }
 
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
