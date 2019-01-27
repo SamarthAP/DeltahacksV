@@ -13,7 +13,7 @@
             <size
                 android:height="30dp"/>
             <solid
-                android:color="#cc780b6a"/>
+                android:color="#ccac1899"/>
         </shape>
     </item>
     <item>
@@ -28,7 +28,7 @@
             <size
                 android:height="30dp"/>
             <solid
-                android:color="#cc5b0b59"/>
+                android:color="#cc931c90"/>
         </shape>
     </item>
 
