@@ -147,10 +147,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public void onClick(View view) {
                 onResume();
                 if (checkPermissionFromDevice()) {
-
-//                    pathRaw = Environment.getExternalStorageDirectory().getAbsolutePath() +
-//                            "/" + UUID.randomUUID().toString();
-//                    pathSave = pathRaw + "_audio_record.3aac";
                     setUpMediaRecorder();
                     try {
                         mediaRecorder.prepare();
@@ -158,10 +154,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-
-                    //btnPlay.setEnabled(false);
-                    //btnStop.setEnabled(false);
-
                     Toast.makeText(MainActivity.this, "Recording...", Toast.LENGTH_SHORT).show();
                 } else {
                     requestPermission();
@@ -182,62 +174,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public void onClick (View view){
                 onPause();
                 mediaRecorder.stop();
-                //btnStop.setEnabled(false);
-                //btnPlay.setEnabled(true);
                 btnRecord.setEnabled(true);
                 btnStopRecord.setEnabled(false);
-                //mediaPlayer.release();
                 convertFile();
 
                 Log.e("PATHTHISONE", pathRaw);
-//                Toast.makeText(MainActivity.this, "STATUS: " + apneaDetector.getStatus(pathRaw), Toast.LENGTH_LONG).show();
-
-//                setUpMediaRecorder();
             }
         });
-
-//        btnPlay.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                btnStop.setEnabled(true);
-//                btnStopRecord.setEnabled(true);
-//                btnRecord.setEnabled(false);
-//                btnPlay.setEnabled(false);
-//
-//                mediaPlayer = new MediaPlayer();
-//                try {
-//                    mediaPlayer.setDataSource(pathSave);
-//                    mediaPlayer.prepare();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//
-//                mediaPlayer.start();
-//                Toast.makeText(MainActivity.this, "Playing...", Toast.LENGTH_LONG).show();
-//            }
-//        });
-
-//        btnStop.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                btnStopRecord.setEnabled(false);
-//                btnRecord.setEnabled(true);
-//                btnPlay.setEnabled(true);
-//                btnStop.setEnabled(false);
-//
-//                if (mediaPlayer != null){
-//                    mediaPlayer.stop();
-//                    mediaPlayer.release();
-//                    convertFile();
-//                    Log.e("PATHTHISONE", pathRaw);
-//                    Toast.makeText(MainActivity.this, "STATUS: " + apneaDetector.getStatus(), Toast.LENGTH_LONG).show();
-//                    setUpMediaRecorder();
-//                }
-//            }
-//        });
-
-
-
     }
 
     @Override
@@ -298,7 +241,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             @Override
             public void onSuccess(File convertedFile) {
                 Log.e("MEDIAFILE SUC", convertedFile.toString());
-                Toast.makeText(MainActivity.this, "STATUS: " + apneaDetector.getStatus(pathRaw), Toast.LENGTH_LONG).show();
+
+                TextView status = (TextView) findViewById(R.id.status);
+                status.setText(apneaDetector.getStatus(pathRaw));
+                //Toast.makeText(MainActivity.this, "STATUS: " + apneaDetector.getStatus(pathRaw), Toast.LENGTH_LONG).show();
                 // So fast? Love it!
             }
             @Override
@@ -319,7 +265,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                 // Start conversion
                 .convert();
-        Log.e("POOP", aacFile.getPath()); // TODO: Remove
     }
 
     public void displayCleanValues() {

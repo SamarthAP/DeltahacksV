@@ -8,8 +8,8 @@ public class ApneaDetector {
 
     private int THRESHHOLD = 380;
 
-    public boolean getStatus(String pathRaw) {
-        boolean status = false;
+    public String getStatus(String pathRaw) {
+        String status = "N/A";
         try {
             WavFile wavFile = WavFile.openWavFile(new File(pathRaw + "_audio_record.wav"));
             wavFile.display();
@@ -35,7 +35,7 @@ public class ApneaDetector {
 
     }
 
-    private boolean hasApnea(int[] list, int frames, int sampleRate) {
+    private String hasApnea(int[] list, int frames, int sampleRate) {
         int episodes = 0;
         int delta = -1;
         for (int i = 0; i < frames; i += sampleRate) {
@@ -53,7 +53,17 @@ public class ApneaDetector {
 
         double hours = frames/(3600.0*sampleRate);
 
-        return episodes/hours >= 15;
+        double apneicEpisodeRate = episodes/hours;
+
+        if (apneicEpisodeRate < 5) {
+            return "No sleep apnea";
+        } else if (apneicEpisodeRate <= 15) {
+            return "Mild sleep apnea";
+        } else if (apneicEpisodeRate <= 30) {
+            return "Moderate sleep apnea";
+        } else {
+            return "Severe sleep apnea";
+        }
     }
 
 }
