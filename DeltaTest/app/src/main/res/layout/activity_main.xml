@@ -11,7 +11,7 @@
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="40dp"
         android:layout_marginTop="208dp"
         android:text="RECORD AREA"
         android:textColor="@android:color/holo_blue_bright"
@@ -37,7 +37,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="208dp"
-        android:layout_marginEnd="44dp"
+        android:layout_marginEnd="32dp"
         android:text="PLAY AREA"
         android:textColor="@android:color/holo_blue_bright"
         android:textSize="24sp"
@@ -64,6 +64,7 @@
         android:layout_width="291dp"
         android:layout_height="40dp"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="360dp"
         android:text="TextView"
@@ -72,7 +73,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.454"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/yText" />
 
     <TextView
         android:id="@+id/xText"
@@ -96,9 +98,9 @@
         android:id="@+id/btnStartRecord"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/rounded_button"
-        android:layout_marginStart="52dp"
+        android:layout_marginStart="60dp"
         android:layout_marginTop="32dp"
+        android:background="@drawable/rounded_button"
         android:text="RECORD"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView3" />
@@ -107,20 +109,23 @@
         android:id="@+id/btnStopRecord"
         android:layout_width="110dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="40dp"
+        android:layout_marginStart="52dp"
+        android:layout_marginTop="8dp"
         android:layout_marginBottom="132dp"
         android:background="@drawable/rounded_button"
         android:text="STOP RECORD"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnStartRecord"
+        app:layout_constraintVertical_bias="0.0" />
 
     <Button
         android:id="@+id/btnPlay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/rounded_button"
         android:layout_marginTop="32dp"
-        android:layout_marginEnd="60dp"
+        android:layout_marginEnd="48dp"
+        android:background="@drawable/rounded_button"
         android:text="PLAY"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView4" />
@@ -129,8 +134,8 @@
         android:id="@+id/btnStop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/rounded_button"
         android:layout_marginTop="8dp"
+        android:background="@drawable/rounded_button"
         android:text="STOP"
         app:layout_constraintStart_toStartOf="@+id/btnPlay"
         app:layout_constraintTop_toBottomOf="@+id/btnPlay" />
