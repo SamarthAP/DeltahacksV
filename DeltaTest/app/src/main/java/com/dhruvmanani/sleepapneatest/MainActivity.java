@@ -187,9 +187,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 convertFile();
 
                 Log.e("PATHTHISONE", pathRaw);
-                Toast.makeText(MainActivity.this, "STATUS: " + apneaDetector.getStatus(), Toast.LENGTH_LONG).show();
+//                Toast.makeText(MainActivity.this, "STATUS: " + apneaDetector.getStatus(pathRaw), Toast.LENGTH_LONG).show();
 
-                setUpMediaRecorder();
+//                setUpMediaRecorder();
             }
         });
 
@@ -313,18 +313,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void convertFile() {
-        Log.e("MEDIAFILE",  pathSave);
+        Log.e("MEDIAFILE BEF",  pathSave);
         File aacFile = new File(pathSave);
-        Log.e("MEDIAFILE", "CONVERTING");
+        Log.e("MEDIAFILE CONV", "CONVERTING");
         IConvertCallback callback = new IConvertCallback() {
             @Override
             public void onSuccess(File convertedFile) {
-                Log.e("MEDIAFILE", convertedFile.toString());
+                Log.e("MEDIAFILE SUC", convertedFile.toString());
+                Toast.makeText(MainActivity.this, "STATUS: " + apneaDetector.getStatus(pathRaw), Toast.LENGTH_LONG).show();
                 // So fast? Love it!
             }
             @Override
             public void onFailure(Exception error) {
-                Log.e("MEDIAFILE", error.toString());
+                Log.e("MEDIAFILE ERR", error.toString());
                 // Oops! Something went wrong
             }
         };
