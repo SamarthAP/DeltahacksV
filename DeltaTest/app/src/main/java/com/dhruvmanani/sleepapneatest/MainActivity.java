@@ -18,12 +18,14 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.os.Handler;
 import android.widget.ToggleButton;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
@@ -153,6 +155,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                // Actions to do after 1 second
+            }
+        }, 1000);
 
     }
 
